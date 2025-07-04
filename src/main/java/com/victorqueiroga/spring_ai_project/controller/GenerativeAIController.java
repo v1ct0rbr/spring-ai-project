@@ -19,15 +19,19 @@ public class GenerativeAIController {
     private final ChatService chatService;
 
     @GetMapping("/ask-ai")
-    public ResponseEntity<ResponseEntityUtils<String>> chat(@RequestParam String prompt) {
-        String response = chatService.getResponse(prompt);
-        return ResponseEntity.ok(
-                ResponseEntityUtils.<String>builder()
-                        .body(response)
-                        .message("Response from AI")
-                        .typeMessage(ResponseEntityUtils.TYPE_MESSAGE_SUCCESS)
-                        .build()
-        );
+    public ResponseEntity<String> chat(@RequestParam String prompt) {
+        try {
+            if (!isValidPrompt(prompt)) {
+                throw new IllegalArgumentException("Prompt cannot be null or empty");
+            }
+            String response = chatService.getResponse(prompt);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(400).body("Error: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }     
+        
     }
 
     @GetMapping("/ask-ai-with-model")
@@ -51,5 +55,9 @@ public class GenerativeAIController {
             );
         }
 
+    }
+
+    private Boolean isValidPrompt(String prompt) {
+        return prompt != null && !prompt.trim().isEmpty();
     }
 }
