@@ -1,6 +1,10 @@
 package com.victorqueiroga.spring_ai_project.service;
 
+import java.util.Map;
+
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -17,16 +21,21 @@ public class RecipeService {
     }
 
     public String createRecipe(String ingredients, String cuisineType, String dietaryRestrictions) {
-        StringBuilder prompt = new StringBuilder("Create a recipe using the following ingredients: " + ingredients);
 
-        if (cuisineType != null && !cuisineType.isEmpty()) {
-            prompt.append(", cuisine type: ").append(cuisineType);
-        }
+        var template = """
+                I want to create a recipe using the following ingredients: {ingredients}.
+                The cuisine type I prefer is {cuisineType}.
+                Please consider the following dietary restrictions: {dietaryRestrictions}.
+                Please provide me with a detailed recipe including title, list of ingredients, and cooking instructions.
+                """;
+        PromptTemplate promptTemplate = new PromptTemplate(template);
+        Map<String, Object> params = Map.of(
+                "ingredients", ingredients,
+                "cuisineType", cuisineType,
+                "dietaryRestrictions", dietaryRestrictions
+        );
+        Prompt prompt = promptTemplate.create(params);
 
-        if (dietaryRestrictions != null && !dietaryRestrictions.isEmpty()) {
-            prompt.append(", dietary restrictions: ").append(dietaryRestrictions);
-        }
-
-        return chatModel.call(prompt.toString());
+        return chatModel.call(prompt).getResult().getOutput().getText();
     }
 }

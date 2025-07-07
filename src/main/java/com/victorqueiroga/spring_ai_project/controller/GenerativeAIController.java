@@ -7,43 +7,30 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.victorqueiroga.spring_ai_project.service.ChatService;
-import com.victorqueiroga.spring_ai_project.utils.StringUtils;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/chat")
 @RequiredArgsConstructor
 public class GenerativeAIController {
 
     private final ChatService chatService;
+   
 
     @GetMapping("/ask-ai")
-    public ResponseEntity<String> getResponse(@RequestParam String prompt) {
-        try {
-            if (!StringUtils.isValidPrompt(prompt)) {
-                throw new IllegalArgumentException("Prompt cannot be null or empty");
-            }
-            String response = chatService.getResponse(prompt);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body("Error: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
+    public ResponseEntity<String> getResponse(@RequestParam @NotBlank String prompt) {
+        return ResponseEntity.ok(chatService.getResponse(prompt));
 
     }
 
     @GetMapping("/ask-ai-with-options")
-    public ResponseEntity<String> getResponseWithOptions(@RequestParam String prompt) {
-        try {
-            String response = chatService.getResponseWithOptions(prompt);
-            return ResponseEntity.ok(response);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(400).body("Error: " + e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error: " + e.getMessage());
-        }
+    public ResponseEntity<String> getResponseWithOptions(@RequestParam @NotBlank String prompt) {
+        String response = chatService.getResponseWithOptions(prompt);
+        return ResponseEntity.ok(response);
     }
+
+    
 
 }
